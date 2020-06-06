@@ -2,10 +2,14 @@ import React from 'react';
 
 import CurrentUser from './CurrentUser';
 import SignInAndSignUp from './SignInAndSignUp';
+import SignIn from './SignIn';
 
-const Authentication = ({ user, loading }) => {
-  if (loading) return null;
+const Authentication = ({ user, userLoaded }) => {
+  // if (!userLoaded) return null;
 
+  // const userInfo = user ? <CurrentUser {...user} /> : <SignInAndSignUp />;
+
+  // return <div>{userLoaded ? userInfo : <SignInAndSignUp />}</div>;
   return <div>{user ? <CurrentUser {...user} /> : <SignInAndSignUp />}</div>;
 };
 

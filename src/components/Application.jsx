@@ -5,6 +5,8 @@ import { firestore, auth } from '../firebase';
 import Posts from './Posts';
 import Authentication from './Authentication';
 import { collectIdsAndDocs } from '../utilities';
+import CurrentUser from './CurrentUser';
+import SignIn from './SignIn';
 
 class Application extends Component {
   state = {
@@ -25,6 +27,7 @@ class Application extends Component {
       // },
     ],
     user: null,
+    userLoaded: false,
   };
 
   unsubscribeFromFirestore = null;
@@ -39,8 +42,14 @@ class Application extends Component {
       });
 
     this.unsubscribeFromAuth = auth.onAuthStateChanged(user => {
-      console.log(user);
-      this.setState({ user });
+      // console.log(user);
+      if (user) {
+        this.setState({ user, userLoaded: true });
+        localStorage.setItem('user', JSON.stringify(this.state.userLoaded));
+      } else {
+        this.setState({ ...this.state, user: null, userLoaded: false });
+        localStorage.setItem('user', JSON.stringify(this.state.userLoaded));
+      }
     });
   };
 
@@ -49,12 +58,16 @@ class Application extends Component {
   };
 
   render() {
-    const { posts } = this.state;
+    const { posts, user, userLoaded } = this.state;
+
+    // const haveUser = JSON.parse(localStorage.getItem('user'));
+    // const userInformation = user ? <CurrentUser {...user} /> : <SignIn />;
 
     return (
       <main className="Application">
         <h1>Think Piece</h1>
-        <Authentication user={this.state.user} />
+        {/* {userLoaded && userInformation} */}
+        <Authentication user={user} userLoaded={userLoaded} />
         <Posts posts={posts} />
       </main>
     );

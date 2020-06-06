@@ -1,12 +1,14 @@
 import React from 'react';
 
 import moment from 'moment';
-import { firestore } from '../firebase';
+import { firestore, auth } from '../firebase';
 
 const Post = ({ title, content, user, createdAt, stars, comments, id }) => {
   const postRef = firestore.doc(`posts/${id}`);
   const remove = () => postRef.delete();
   const updateStar = () => postRef.update({ stars: stars + 1 });
+
+  const { uid } = auth.currentUser || {};
 
   return (
     <article className="Post">
@@ -35,9 +37,11 @@ const Post = ({ title, content, user, createdAt, stars, comments, id }) => {
           <button className="star" onClick={updateStar}>
             Star
           </button>
-          <button className="delete" onClick={remove}>
-            Delete
-          </button>
+          {uid === user.uid ? (
+            <button className="delete" onClick={remove}>
+              Delete
+            </button>
+          ) : null}
         </div>
       </div>
     </article>

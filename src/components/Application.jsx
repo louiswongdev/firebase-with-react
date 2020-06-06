@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 
-import { firestore } from '../firebase';
+import { firestore, auth } from '../firebase';
 
 import Posts from './Posts';
+import Authentication from './Authentication';
 import { collectIdsAndDocs } from '../utilities';
 
 class Application extends Component {
@@ -23,41 +24,28 @@ class Application extends Component {
       //   comments: 47,
       // },
     ],
+    user: null,
   };
 
-  unsubscribe = null;
+  unsubscribeFromFirestore = null;
+  unsubscribeFromAuth = null;
 
   componentDidMount = async () => {
-    this.unsubscribe = firestore.collection('posts').onSnapshot(snapshot => {
-      const posts = snapshot.docs.map(collectIdsAndDocs);
-      this.setState({ posts }, () => console.log(posts));
+    this.unsubscribeFromFirestore = firestore
+      .collection('posts')
+      .onSnapshot(snapshot => {
+        const posts = snapshot.docs.map(collectIdsAndDocs);
+        this.setState({ posts }, () => console.log(posts));
+      });
+
+    this.unsubscribeFromAuth = auth.onAuthStateChanged(user => {
+      console.log(user);
+      this.setState({ user });
     });
   };
 
   componentWillUnmount = () => {
-    this.unsubscribe();
-  };
-
-  handleCreate = async post => {
-    const { posts } = this.state;
-
-    const docRef = await firestore.collection('posts').add(post);
-    const doc = await docRef.get();
-
-    const newPost = collectIdsAndDocs(doc);
-
-    this.setState({ posts: [newPost, ...posts] });
-  };
-
-  handleRemove = async id => {
-    console.log('removed id: ', id);
-    const allPosts = this.state.posts;
-
-    await firestore.doc(`posts/${id}`).delete();
-
-    const posts = allPosts.filter(post => post.id !== id);
-
-    this.setState({ posts });
+    this.unsubscribeFromFirestore();
   };
 
   render() {
@@ -66,11 +54,8 @@ class Application extends Component {
     return (
       <main className="Application">
         <h1>Think Piece</h1>
-        <Posts
-          posts={posts}
-          onCreate={this.handleCreate}
-          onRemove={this.handleRemove}
-        />
+        <Authentication user={this.state.user} />
+        <Posts posts={posts} />
       </main>
     );
   }

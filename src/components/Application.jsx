@@ -25,11 +25,17 @@ class Application extends Component {
     ],
   };
 
-  componentDidMount = async () => {
-    const snapshot = await firestore.collection('posts').get();
+  unsubscribe = null;
 
-    const posts = snapshot.docs.map(collectIdsAndDocs);
-    this.setState({ posts }, () => console.log(this.state));
+  componentDidMount = async () => {
+    this.unsubscribe = firestore.collection('posts').onSnapshot(snapshot => {
+      const posts = snapshot.docs.map(collectIdsAndDocs);
+      this.setState({ posts }, () => console.log(posts));
+    });
+  };
+
+  componentWillUnmount = () => {
+    this.unsubscribe();
   };
 
   handleCreate = async post => {
@@ -44,6 +50,7 @@ class Application extends Component {
   };
 
   handleRemove = async id => {
+    console.log('removed id: ', id);
     const allPosts = this.state.posts;
 
     await firestore.doc(`posts/${id}`).delete();

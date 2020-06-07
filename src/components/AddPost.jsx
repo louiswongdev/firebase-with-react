@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 
 import { firestore, auth } from '../firebase';
+import { UserContext } from '../providers/UserProvider';
 
 class AddPost extends Component {
   state = { title: '', content: '' };
@@ -10,10 +11,15 @@ class AddPost extends Component {
     this.setState({ [name]: value });
   };
 
-  handleSubmit = event => {
+  handleSubmit = (event, user) => {
     event.preventDefault();
+
+    console.log('context user:', user);
     const { title, content } = this.state;
-    const { uid, displayName, email, photoURL } = auth.currentUser || {};
+    // const { uid, displayName, email, photoURL } = auth.currentUser || {};
+    const { uid, displayName, email, photoURL } = user;
+
+    // console.log('displayName: ', user);
 
     const post = {
       // id: Date.now().toString(),
@@ -38,23 +44,31 @@ class AddPost extends Component {
   render() {
     const { title, content } = this.state;
     return (
-      <form onSubmit={this.handleSubmit} className="AddPost">
-        <input
-          type="text"
-          name="title"
-          placeholder="Title"
-          value={title}
-          onChange={this.handleChange}
-        />
-        <input
-          type="text"
-          name="content"
-          placeholder="Body"
-          value={content}
-          onChange={this.handleChange}
-        />
-        <input className="create" type="submit" value="Create Post" />
-      </form>
+      <UserContext.Consumer>
+        {user => (
+          <form
+            // onSubmit={this.handleSubmit.bind(this, user)}
+            onSubmit={e => this.handleSubmit(e, user)}
+            className="AddPost"
+          >
+            <input
+              type="text"
+              name="title"
+              placeholder="Title"
+              value={title}
+              onChange={this.handleChange}
+            />
+            <input
+              type="text"
+              name="content"
+              placeholder="Body"
+              value={content}
+              onChange={this.handleChange}
+            />
+            <input className="create" type="submit" value="Create Post" />
+          </form>
+        )}
+      </UserContext.Consumer>
     );
   }
 }

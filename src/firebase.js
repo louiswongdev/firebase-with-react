@@ -18,7 +18,18 @@ export const firestore = firebase.firestore();
 export const auth = firebase.auth();
 
 export const provider = new firebase.auth.GoogleAuthProvider();
+
+// signin with Google
 export const signInWithGoogle = () => auth.signInWithPopup(provider);
+
+// signin with email and password
+export const signInWithEmail = async (email, password) => {
+  try {
+    await auth.signInWithEmailAndPassword(email, password);
+  } catch (err) {
+    console.error(err.message);
+  }
+};
 
 // signout
 export const signOut = () => auth.signOut();

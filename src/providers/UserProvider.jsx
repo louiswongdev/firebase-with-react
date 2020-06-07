@@ -10,9 +10,22 @@ class UserProvider extends Component {
 
   componentDidMount = async () => {
     this.unsubscribeFromAuth = auth.onAuthStateChanged(async userAuth => {
-      const user = await createUserProfileDocument(userAuth);
-      console.log(user);
-      this.setState({ user });
+      if (userAuth) {
+        const userRef = await createUserProfileDocument(userAuth);
+        // listen for changes in our authed userRef
+        userRef.onSnapshot(onSnapshot => {
+          this.setState({
+            user: { uid: onSnapshot.id, ...onSnapshot.data() },
+          });
+        });
+      }
+
+      // inital userAuth object on page reload is the full firebase auth object
+      // returned from onAuthStateChanged. Once userAuth is passed into
+      // createUserProfileDocument, userRef.onSnapshot triggers another
+      // setState, this time with our true user object with uid, email,
+      // displayName, createdAt and photoURL
+      this.setState({ user: userAuth });
     });
   };
 

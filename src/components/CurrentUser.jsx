@@ -15,7 +15,9 @@ const CurrentUser = ({ displayName, photoURL, email, createdAt, children }) => {
           </Link>
           <p className="email">{email}</p>
           <p className="created-at">
-            {new Date(createdAt.seconds * 1000).toLocaleDateString('en-US')}
+            {createdAt &&
+              new Date(createdAt.seconds * 1000).toLocaleDateString('en-US')}
+            {/* {moment(createdAt).calendar()} */}
           </p>
         </div>
       </div>

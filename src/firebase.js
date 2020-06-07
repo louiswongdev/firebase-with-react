@@ -73,11 +73,7 @@ export const getUserDocument = async uid => {
   if (!uid) return null;
 
   try {
-    const userDocument = await firestore.collection('users').doc(uid).get();
-
-    return { uid, ...userDocument.data() };
-    // obj returned something like this:
-    // {uid: "B9JT9gOnsDa9oZ48prpTw3VnZSI2", createdAt: t, email: "billyg@gmail.com", photoURL: null, displayName: "billyG"}
+    return firestore.collection('users').doc(uid);
   } catch (err) {
     console.error('Error fetching user', err.message);
   }

@@ -23,6 +23,55 @@ export const signInWithGoogle = () => auth.signInWithPopup(provider);
 // signout
 export const signOut = () => auth.signOut();
 
+//  Create documents for user profiles in Cloud Firestore.
+export const createUserProfileDocument = async (user, additionalData) => {
+  // If there is no user, let's not do this.
+  if (!user) return;
+
+  // Get a reference to the location in the Firestore where the user
+  // document may or may not exist.
+  const userRef = firestore.doc(`users/${user.uid}`);
+
+  // Go and fetch a document from that location.
+  const snapshot = await userRef.get();
+
+  // If there isn't a document for that user. Let's use information
+  // that we got from either Google or our sign up form.
+  if (!snapshot.exists) {
+    const { displayName, email, photoURL } = user;
+    const createdAt = new Date();
+    try {
+      await userRef.set({
+        displayName,
+        email,
+        photoURL,
+        createdAt,
+        ...additionalData,
+      });
+    } catch (err) {
+      console.error('Error creating user', err);
+    }
+  }
+
+  // Get the document and return it, since that's what we're
+  // likely to want to do next.
+  return getUserDocument(user.uid);
+};
+
+export const getUserDocument = async uid => {
+  if (!uid) return null;
+
+  try {
+    const userDocument = await firestore.collection('users').doc(uid).get();
+
+    return { uid, ...userDocument.data() };
+    // obj returned something like this:
+    // {uid: "B9JT9gOnsDa9oZ48prpTw3VnZSI2", createdAt: t, email: "billyg@gmail.com", photoURL: null, displayName: "billyG"}
+  } catch (err) {
+    console.error('Error fetching user', err.message);
+  }
+};
+
 window.firebase = firebase;
 
 export default firebase;

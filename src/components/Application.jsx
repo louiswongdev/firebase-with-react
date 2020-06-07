@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import { firestore, auth } from '../firebase';
+import { firestore, auth, createUserProfileDocument } from '../firebase';
 
 import Posts from './Posts';
 import Authentication from './Authentication';
@@ -41,15 +41,18 @@ class Application extends Component {
         this.setState({ posts }, () => console.log(posts));
       });
 
-    this.unsubscribeFromAuth = auth.onAuthStateChanged(user => {
-      // console.log(user);
-      if (user) {
-        this.setState({ user, userLoaded: true });
-        localStorage.setItem('user', JSON.stringify(this.state.userLoaded));
-      } else {
-        this.setState({ ...this.state, user: null, userLoaded: false });
-        localStorage.setItem('user', JSON.stringify(this.state.userLoaded));
-      }
+    this.unsubscribeFromAuth = auth.onAuthStateChanged(async userAuth => {
+      const user = await createUserProfileDocument(userAuth);
+      console.log(user);
+      this.setState({ user });
+
+      // if (user) {
+      // this.setState({ user, userLoaded: true });
+      //   localStorage.setItem('user', JSON.stringify(this.state.userLoaded));
+      // } else {
+      //   this.setState({ ...this.state, user: null, userLoaded: false });
+      //   localStorage.setItem('user', JSON.stringify(this.state.userLoaded));
+      // }
     });
   };
 

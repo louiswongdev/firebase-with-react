@@ -22,7 +22,6 @@ class AddPost extends Component {
     // console.log('displayName: ', user);
 
     const post = {
-      // id: Date.now().toString(),
       title,
       content,
       user: {
